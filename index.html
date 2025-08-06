@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment & Invoice System</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Payment & Invoice System</h1>
+            <p>Enter payment details to generate an invoice with QR code</p>
+        </header>
+
+        <main>
+            <!-- Payment Form -->
+            <div class="payment-section" id="paymentSection">
+                <div class="card">
+                    <h2>Payment Details</h2>
+                    <form id="paymentForm">
+                        <div class="form-group">
+                            <label for="customerName">Customer Name</label>
+                            <input type="text" id="customerName" name="customerName" required placeholder="Enter customer name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="amount">Amount (USD)</label>
+                            <input type="number" id="amount" name="amount" step="0.01" min="0.01" required placeholder="0.00">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Description (Optional)</label>
+                            <input type="text" id="description" name="description" placeholder="Payment description">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" required placeholder="customer@example.com">
+                        </div>
+
+                        <button type="submit" class="btn-primary" id="submitBtn">
+                            <span id="btnText">Process Payment</span>
+                            <div id="spinner" class="spinner hidden"></div>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Invoice Section -->
+            <div class="invoice-section hidden" id="invoiceSection">
+                <div class="card">
+                    <h2>Invoice Generated</h2>
+                    <div class="invoice-details" id="invoiceDetails">
+                        <!-- Invoice content will be dynamically generated -->
+                    </div>
+                    <div class="qr-section">
+                        <h3>Invoice QR Code</h3>
+                        <canvas id="qrcode"></canvas>
+                        <p class="qr-description">Scan to view invoice details</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn-secondary" onclick="downloadInvoice()">Download Invoice</button>
+                        <button class="btn-primary" onclick="newPayment()">New Payment</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Demo Mode Notice -->
+            <div class="demo-notice">
+                <p><strong>Demo Mode:</strong> This is a demonstration. No actual payments will be processed.</p>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
