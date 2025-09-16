@@ -28,20 +28,25 @@ function initializeApp() {
     if (chatInput && sendChatBtn) {
         sendChatBtn.addEventListener('click', sendChatMessage);
         chatInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 sendChatMessage();
             }
         });
+        chatInput.addEventListener('input', autoResizeTextarea);
     }
 
     // WebRTC UI events
     const btnHostCreateOffer = document.getElementById('btnHostCreateOffer');
     const btnHostSetAnswer = document.getElementById('btnHostSetAnswer');
     const btnJoinCreateAnswer = document.getElementById('btnJoinCreateAnswer');
+    const btnModeStart = document.getElementById('btnModeStart');
+    const btnModeJoin = document.getElementById('btnModeJoin');
     if (btnHostCreateOffer) btnHostCreateOffer.addEventListener('click', webrtcHostCreateOffer);
     if (btnHostSetAnswer) btnHostSetAnswer.addEventListener('click', webrtcHostSetAnswer);
     if (btnJoinCreateAnswer) btnJoinCreateAnswer.addEventListener('click', webrtcJoinCreateAnswer);
+    if (btnModeStart) btnModeStart.addEventListener('click', () => switchWebrtcMode('start'));
+    if (btnModeJoin) btnModeJoin.addEventListener('click', () => switchWebrtcMode('join'));
 }
 
 // Removed fractal background animation functions
@@ -106,6 +111,12 @@ function renderChatMessages() {
         `<div class="chat-message"><span class="author">${m.author}:</span><span class="text">${escapeHtml(m.text)}</span></div>`
     )).join('');
     list.scrollTop = list.scrollHeight;
+}
+
+function autoResizeTextarea(e) {
+    const el = e.target;
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 180) + 'px';
 }
 
 function escapeHtml(unsafe) {
@@ -460,6 +471,19 @@ function resetWebrtc() {
 function setWebrtcStatus(text) {
     const el = document.getElementById('webrtcStatus');
     if (el) el.textContent = text;
+}
+
+function switchWebrtcMode(mode) {
+    const start = document.getElementById('webrtcStart');
+    const join = document.getElementById('webrtcJoin');
+    if (!start || !join) return;
+    if (mode === 'start') {
+        start.classList.remove('hidden');
+        join.classList.add('hidden');
+    } else {
+        join.classList.remove('hidden');
+        start.classList.add('hidden');
+    }
 }
 
 function bindPeerEvents(peer) {
