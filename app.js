@@ -34,6 +34,14 @@ function initializeApp() {
             }
         });
     }
+
+    // WebRTC UI events
+    const btnHostCreateOffer = document.getElementById('btnHostCreateOffer');
+    const btnHostSetAnswer = document.getElementById('btnHostSetAnswer');
+    const btnJoinCreateAnswer = document.getElementById('btnJoinCreateAnswer');
+    if (btnHostCreateOffer) btnHostCreateOffer.addEventListener('click', webrtcHostCreateOffer);
+    if (btnHostSetAnswer) btnHostSetAnswer.addEventListener('click', webrtcHostSetAnswer);
+    if (btnJoinCreateAnswer) btnJoinCreateAnswer.addEventListener('click', webrtcJoinCreateAnswer);
 }
 
 // Removed fractal background animation functions
@@ -67,22 +75,28 @@ function switchTab(tab) {
 
 // In-memory chat state (non-storage)
 const chatMessages = [];
+let webrtcPeer = null;
+let webrtcChannel = null;
+let isWebrtcConnected = false;
 
 function sendChatMessage() {
     const input = document.getElementById('chatInput');
     const text = (input.value || '').trim();
     if (!text) return;
 
-    // Push user message
-    chatMessages.push({ author: 'You', text, timestamp: Date.now() });
+    // Send over WebRTC if available
+    if (webrtcChannel && webrtcChannel.readyState === 'open') {
+        webrtcChannel.send(JSON.stringify({ type: 'chat', text }));
+        chatMessages.push({ author: 'Me', text, timestamp: Date.now() });
+        renderChatMessages();
+        input.value = '';
+        return;
+    }
+
+    // Local only fallback
+    chatMessages.push({ author: 'Me', text, timestamp: Date.now() });
     renderChatMessages();
     input.value = '';
-
-    // Simulated assistant echo (non-network, non-storage)
-    setTimeout(() => {
-        chatMessages.push({ author: 'Assistant', text: `Echo: ${text}`, timestamp: Date.now() });
-        renderChatMessages();
-    }, 400);
 }
 
 function renderChatMessages() {
@@ -99,7 +113,7 @@ function escapeHtml(unsafe) {
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
+        .replace(/\"/g, '&quot;')
         .replace(/'/g, '&#039;');
 }
 
@@ -423,3 +437,133 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// -------------------- WebRTC Data Channel (manual signaling) --------------------
+function getWebrtcConfig() {
+    return {
+        iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:global.stun.twilio.com:3478?transport=udp' }
+        ]
+    };
+}
+
+function resetWebrtc() {
+    try { if (webrtcChannel) webrtcChannel.close(); } catch (_) {}
+    try { if (webrtcPeer) webrtcPeer.close(); } catch (_) {}
+    webrtcPeer = null;
+    webrtcChannel = null;
+    isWebrtcConnected = false;
+    setWebrtcStatus('Disconnected');
+}
+
+function setWebrtcStatus(text) {
+    const el = document.getElementById('webrtcStatus');
+    if (el) el.textContent = text;
+}
+
+function bindPeerEvents(peer) {
+    peer.onconnectionstatechange = () => {
+        const state = peer.connectionState;
+        setWebrtcStatus(state.charAt(0).toUpperCase() + state.slice(1));
+        if (state === 'disconnected' || state === 'failed' || state === 'closed') {
+            isWebrtcConnected = false;
+        }
+    };
+    peer.oniceconnectionstatechange = () => {
+        const s = peer.iceConnectionState;
+        if (s === 'connected' || s === 'completed') {
+            isWebrtcConnected = true;
+            setWebrtcStatus('Connected');
+        }
+    };
+    peer.ondatachannel = (e) => {
+        webrtcChannel = e.channel;
+        bindChannelEvents(webrtcChannel);
+    };
+}
+
+function bindChannelEvents(channel) {
+    channel.onopen = () => {
+        isWebrtcConnected = true;
+        setWebrtcStatus('Connected');
+    };
+    channel.onclose = () => {
+        isWebrtcConnected = false;
+        setWebrtcStatus('Disconnected');
+    };
+    channel.onmessage = (e) => {
+        try {
+            const msg = JSON.parse(e.data);
+            if (msg.type === 'chat') {
+                chatMessages.push({ author: 'Peer', text: msg.text, timestamp: Date.now() });
+                renderChatMessages();
+            }
+        } catch (_) {}
+    };
+}
+
+async function webrtcHostCreateOffer() {
+    resetWebrtc();
+    webrtcPeer = new RTCPeerConnection(getWebrtcConfig());
+    bindPeerEvents(webrtcPeer);
+    webrtcChannel = webrtcPeer.createDataChannel('chat');
+    bindChannelEvents(webrtcChannel);
+
+    const offer = await webrtcPeer.createOffer({ offerToReceiveAudio: false, offerToReceiveVideo: false });
+    await webrtcPeer.setLocalDescription(offer);
+    await waitForIceGatheringComplete(webrtcPeer);
+
+    const offerOut = document.getElementById('offerOut');
+    if (offerOut) offerOut.value = JSON.stringify(webrtcPeer.localDescription);
+}
+
+async function webrtcHostSetAnswer() {
+    if (!webrtcPeer) return;
+    const answerIn = document.getElementById('answerIn');
+    try {
+        const desc = JSON.parse(answerIn.value);
+        await webrtcPeer.setRemoteDescription(desc);
+    } catch (e) {
+        alert('Invalid answer JSON');
+    }
+}
+
+async function webrtcJoinCreateAnswer() {
+    resetWebrtc();
+    webrtcPeer = new RTCPeerConnection(getWebrtcConfig());
+    bindPeerEvents(webrtcPeer);
+
+    const offerIn = document.getElementById('offerIn');
+    let remoteOffer;
+    try {
+        remoteOffer = JSON.parse(offerIn.value);
+        await webrtcPeer.setRemoteDescription(remoteOffer);
+    } catch (e) {
+        alert('Invalid offer JSON');
+        return;
+    }
+
+    const answer = await webrtcPeer.createAnswer();
+    await webrtcPeer.setLocalDescription(answer);
+    await waitForIceGatheringComplete(webrtcPeer);
+
+    const answerOut = document.getElementById('answerOut');
+    if (answerOut) answerOut.value = JSON.stringify(webrtcPeer.localDescription);
+}
+
+function waitForIceGatheringComplete(pc) {
+    return new Promise(resolve => {
+        if (pc.iceGatheringState === 'complete') {
+            resolve();
+        } else {
+            const check = () => {
+                if (pc.iceGatheringState === 'complete') {
+                    pc.removeEventListener('icegatheringstatechange', check);
+                    resolve();
+                }
+            };
+            pc.addEventListener('icegatheringstatechange', check);
+        }
+    });
+}

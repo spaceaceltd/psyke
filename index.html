@@ -1,4 +1,4 @@
-THIS SHOULD BE A LINTER ERROR<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -79,6 +79,31 @@ THIS SHOULD BE A LINTER ERROR<!DOCTYPE html>
             <div class="chat-section hidden" id="chatSection">
                 <div class="card">
                     <h2>Chats</h2>
+                    <div class="webrtc-section" id="webrtcSection">
+                        <div class="webrtc-header">
+                            <span class="webrtc-title">Two-Person Chat (WebRTC - copy/paste)</span>
+                            <span class="webrtc-status" id="webrtcStatus">Disconnected</span>
+                        </div>
+                        <div class="webrtc-grid">
+                            <div class="webrtc-block">
+                                <h3>Host</h3>
+                                <button class="btn-secondary" id="btnHostCreateOffer">Create Offer</button>
+                                <label for="offerOut">Offer (copy to peer)</label>
+                                <textarea id="offerOut" class="webrtc-sdp" readonly></textarea>
+                                <label for="answerIn">Answer from peer (paste)</label>
+                                <textarea id="answerIn" class="webrtc-sdp" placeholder="Paste remote answer JSON"></textarea>
+                                <button class="btn-secondary small" id="btnHostSetAnswer">Apply Answer</button>
+                            </div>
+                            <div class="webrtc-block">
+                                <h3>Joiner</h3>
+                                <label for="offerIn">Offer from host (paste)</label>
+                                <textarea id="offerIn" class="webrtc-sdp" placeholder="Paste remote offer JSON"></textarea>
+                                <button class="btn-secondary" id="btnJoinCreateAnswer">Create Answer</button>
+                                <label for="answerOut">Answer (copy to host)</label>
+                                <textarea id="answerOut" class="webrtc-sdp" readonly></textarea>
+                            </div>
+                        </div>
+                    </div>
                     <div class="chat-messages" id="chatMessages" aria-live="polite" aria-label="Chat messages"></div>
                     <div class="chat-input-container">
                         <input type="text" id="chatInput" placeholder="Type a message..." aria-label="Chat message">
