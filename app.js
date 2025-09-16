@@ -141,6 +141,11 @@ function displayInvoiceDetails(invoice) {
 
 async function generateQRCode(invoice) {
     const canvas = document.getElementById('qrcode');
+    const img = document.getElementById('qrcodeImg');
+    
+    // Ensure correct visibility defaults (prefer canvas first)
+    if (img) img.classList.add('hidden');
+    if (canvas) canvas.classList.remove('hidden');
     
     // Create QR code data
     const qrData = {
@@ -156,19 +161,52 @@ async function generateQRCode(invoice) {
     
     const qrText = JSON.stringify(qrData);
     
+    // Clear previous canvas content
+    try {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width || 0, canvas.height || 0);
+    } catch (_) {}
+    
+    // Preferred: render to canvas
     try {
         await QRCode.toCanvas(canvas, qrText, {
             width: 200,
-            height: 200,
-            colorDark: '#333333',
-            colorLight: '#ffffff',
             margin: 2,
-            errorCorrectionLevel: 'M'
+            errorCorrectionLevel: 'M',
+            color: { dark: '#333333', light: '#ffffff' }
         });
+        return;
     } catch (error) {
-        console.error('QR code generation error:', error);
-        canvas.getContext('2d').fillText('QR Code Error', 10, 50);
+        console.error('QR code canvas render failed:', error);
     }
+    
+    // Fallback: data URL -> <img>
+    try {
+        const dataUrl = await QRCode.toDataURL(qrText, {
+            width: 200,
+            margin: 2,
+            errorCorrectionLevel: 'M',
+            color: { dark: '#333333', light: '#ffffff' }
+        });
+        if (img) {
+            img.src = dataUrl;
+            img.classList.remove('hidden');
+        }
+        if (canvas) canvas.classList.add('hidden');
+        return;
+    } catch (fallbackError) {
+        console.error('QR code data URL fallback failed:', fallbackError);
+    }
+    
+    // Last resort: show error text
+    try {
+        const ctx = canvas.getContext('2d');
+        ctx.font = '16px sans-serif';
+        ctx.fillStyle = '#333333';
+        ctx.fillText('QR Code Error', 10, 50);
+        if (img) img.classList.add('hidden');
+        if (canvas) canvas.classList.remove('hidden');
+    } catch (_) {}
 }
 
 function downloadInvoice() {
@@ -227,9 +265,11 @@ For questions, please contact support.
 
 function downloadQRCode() {
     const canvas = document.getElementById('qrcode');
+    const img = document.getElementById('qrcodeImg');
     const link = document.createElement('a');
     link.download = `qr_code_${currentInvoice.invoiceNumber}.png`;
-    link.href = canvas.toDataURL();
+    const isImgVisible = img && !img.classList.contains('hidden') && img.src;
+    link.href = isImgVisible ? img.src : canvas.toDataURL();
     link.click();
 }
 
@@ -243,6 +283,21 @@ function newPayment() {
     
     // Clear current invoice
     currentInvoice = null;
+    
+    // Clear QR code elements
+    try {
+        const canvas = document.getElementById('qrcode');
+        const img = document.getElementById('qrcodeImg');
+        if (img) {
+            img.src = '';
+            img.classList.add('hidden');
+        }
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width || 0, canvas.height || 0);
+            canvas.classList.remove('hidden');
+        }
+    } catch (_) {}
     
     // Focus on first input
     document.getElementById('customerName').focus();
