@@ -4,6 +4,7 @@ let currentInvoice = null;
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
+    initializeFractalBackground();
 });
 
 function initializeApp() {
@@ -34,6 +35,126 @@ function initializeApp() {
             }
         });
     }
+}
+
+// Fractal background renderer (animated, honors reduced motion)
+function initializeFractalBackground() {
+    const canvas = document.getElementById('fractalBg');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d', { alpha: true });
+    let animationFrameId = null;
+
+    function resize() {
+        const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+        const { innerWidth: w, innerHeight: h } = window;
+        canvas.width = Math.floor(w * dpr);
+        canvas.height = Math.floor(h * dpr);
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    let timeStart = performance.now();
+
+    function render(time) {
+        const t = (time - timeStart) * 0.0006; // slow evolution
+        const width = canvas.width;
+        const height = canvas.height;
+        const img = ctx.createImageData(width, height);
+        const data = img.data;
+
+        // Kaleidoscopic distance field with trig color cycling
+        const scale = 0.0025;
+        const freq = 0.9;
+        const twist = 0.35 + 0.25 * Math.sin(t * 0.7);
+
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                const i = (y * width + x) * 4;
+                let u = (x - width / 2) * scale;
+                let v = (y - height / 2) * scale;
+
+                // Polar transform with time-twist
+                const r = Math.hypot(u, v);
+                let a = Math.atan2(v, u) + twist * Math.sin(t + r * 3.0);
+
+                // Mirror to make fractal-like symmetry
+                const k = Math.PI / 3.0; // 6-way symmetry
+                a = ((a % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+                a = Math.abs(((a + k / 2) % k) - k / 2);
+
+                // Iterative folding to create complexity
+                let du = Math.cos(a) * r;
+                let dv = Math.sin(a) * r;
+                for (let it = 0; it < 3; it++) {
+                    const uu = Math.abs(du) - 0.5;
+                    const vv = Math.abs(dv) - 0.5;
+                    du = uu;
+                    dv = vv;
+                }
+
+                const dist = Math.hypot(du, dv);
+
+                // Color palette
+                const hue = 180 + 120 * Math.sin(freq * dist * 10 - t * 6);
+                const sat = 0.9;
+                const val = 0.8 - 0.5 * Math.tanh(dist * 2.5 - 1.5);
+
+                const rgb = hsvToRgb((hue % 360 + 360) % 360, sat, Math.max(0, Math.min(1, val)));
+                data[i + 0] = rgb[0];
+                data[i + 1] = rgb[1];
+                data[i + 2] = rgb[2];
+                data[i + 3] = 255;
+            }
+        }
+
+        ctx.putImageData(img, 0, 0);
+
+        if (!prefersReducedMotion.matches) {
+            animationFrameId = requestAnimationFrame(render);
+        }
+    }
+
+    function start() {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = requestAnimationFrame(render);
+    }
+    function stop() {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+    }
+
+    prefersReducedMotion.addEventListener('change', (e) => {
+        if (e.matches) stop(); else start();
+    });
+
+    if (!prefersReducedMotion.matches) {
+        start();
+    } else {
+        render(performance.now());
+    }
+}
+
+function hsvToRgb(h, s, v) {
+    const c = v * s;
+    const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+    const m = v - c;
+    let r = 0, g = 0, b = 0;
+    if (h < 60) { r = c; g = x; b = 0; }
+    else if (h < 120) { r = x; g = c; b = 0; }
+    else if (h < 180) { r = 0; g = c; b = x; }
+    else if (h < 240) { r = 0; g = x; b = c; }
+    else if (h < 300) { r = x; g = 0; b = c; }
+    else { r = c; g = 0; b = x; }
+    return [
+        Math.round((r + m) * 255),
+        Math.round((g + m) * 255),
+        Math.round((b + m) * 255)
+    ];
 }
 
 function switchTab(tab) {
