@@ -13,6 +13,92 @@ function initializeApp() {
     // Add input formatting
     const amountInput = document.getElementById('amount');
     amountInput.addEventListener('input', formatAmountInput);
+
+    // Tabs
+    const tabPayment = document.getElementById('tabPayment');
+    const tabChats = document.getElementById('tabChats');
+    if (tabPayment && tabChats) {
+        tabPayment.addEventListener('click', () => switchTab('payment'));
+        tabChats.addEventListener('click', () => switchTab('chats'));
+    }
+
+    // Chat events
+    const chatInput = document.getElementById('chatInput');
+    const sendChatBtn = document.getElementById('sendChatBtn');
+    if (chatInput && sendChatBtn) {
+        sendChatBtn.addEventListener('click', sendChatMessage);
+        chatInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendChatMessage();
+            }
+        });
+    }
+}
+
+function switchTab(tab) {
+    const tabPayment = document.getElementById('tabPayment');
+    const tabChats = document.getElementById('tabChats');
+    const paymentSection = document.getElementById('paymentSection');
+    const invoiceSection = document.getElementById('invoiceSection');
+    const chatSection = document.getElementById('chatSection');
+
+    if (tab === 'payment') {
+        tabPayment.classList.add('active');
+        tabPayment.setAttribute('aria-selected', 'true');
+        tabChats.classList.remove('active');
+        tabChats.setAttribute('aria-selected', 'false');
+        paymentSection.classList.remove('hidden');
+        // Only hide invoice if it's not currently showing an invoice flow
+        // Keep existing logic: invoice remains controlled by payment flow
+        chatSection.classList.add('hidden');
+    } else if (tab === 'chats') {
+        tabChats.classList.add('active');
+        tabChats.setAttribute('aria-selected', 'true');
+        tabPayment.classList.remove('active');
+        tabPayment.setAttribute('aria-selected', 'false');
+        paymentSection.classList.add('hidden');
+        invoiceSection.classList.add('hidden');
+        chatSection.classList.remove('hidden');
+    }
+}
+
+// In-memory chat state (non-storage)
+const chatMessages = [];
+
+function sendChatMessage() {
+    const input = document.getElementById('chatInput');
+    const text = (input.value || '').trim();
+    if (!text) return;
+
+    // Push user message
+    chatMessages.push({ author: 'You', text, timestamp: Date.now() });
+    renderChatMessages();
+    input.value = '';
+
+    // Simulated assistant echo (non-network, non-storage)
+    setTimeout(() => {
+        chatMessages.push({ author: 'Assistant', text: `Echo: ${text}`, timestamp: Date.now() });
+        renderChatMessages();
+    }, 400);
+}
+
+function renderChatMessages() {
+    const list = document.getElementById('chatMessages');
+    if (!list) return;
+    list.innerHTML = chatMessages.map(m => (
+        `<div class="chat-message"><span class="author">${m.author}:</span><span class="text">${escapeHtml(m.text)}</span></div>`
+    )).join('');
+    list.scrollTop = list.scrollHeight;
+}
+
+function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }
 
 function formatAmountInput(event) {
