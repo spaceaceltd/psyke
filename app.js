@@ -311,6 +311,21 @@ async function generateQRCode(invoice) {
     
     // Ensure QRCode library is loaded
     await waitForQRCodeLib();
+    const QR = getQRCodeAPI();
+    if (!QR) {
+        try {
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                canvas.width = 220;
+                canvas.height = 220;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.font = '16px sans-serif';
+                ctx.fillStyle = '#333333';
+                ctx.fillText('QR lib missing', 40, 110);
+            }
+        } catch (_) {}
+        return;
+    }
 
     // Create QR code data
     const qrData = {
@@ -328,16 +343,19 @@ async function generateQRCode(invoice) {
     
     // Clear previous canvas content
     try {
-        const ctx = canvas.getContext('2d');
-        // Ensure canvas has sensible size before drawing
-        canvas.width = 220;
-        canvas.height = 220;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            // Ensure canvas has sensible size before drawing
+            canvas.width = 220;
+            canvas.height = 220;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
     } catch (_) {}
     
     // Preferred: render to canvas
     try {
-        await window.QRCode.toCanvas(canvas, qrText, {
+        if (!canvas) throw new Error('QR canvas not found');
+        await QR.toCanvas(canvas, qrText, {
             width: 200,
             margin: 2,
             errorCorrectionLevel: 'M',
@@ -350,7 +368,7 @@ async function generateQRCode(invoice) {
     
     // Fallback: data URL -> <img>
     try {
-        const dataUrl = await window.QRCode.toDataURL(qrText, {
+        const dataUrl = await QR.toDataURL(qrText, {
             width: 200,
             margin: 2,
             errorCorrectionLevel: 'M',
@@ -385,6 +403,16 @@ async function waitForQRCodeLib() {
     while (!window.QRCode && Date.now() - start < 2000) {
         await new Promise(r => setTimeout(r, 50));
     }
+}
+
+function getQRCodeAPI() {
+    if (window.QRCode) return window.QRCode;
+    try {
+        // Fallback if global variable exists without window property
+        // eslint-disable-next-line no-undef
+        if (typeof QRCode !== 'undefined') return QRCode;
+    } catch (_) {}
+    return null;
 }
 
 function downloadInvoice() {
