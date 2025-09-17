@@ -13,7 +13,6 @@ function initializeApp() {
     // Add input formatting
     const amountInput = document.getElementById('amount');
     amountInput.addEventListener('input', formatAmountInput);
-
     // Tabs
     const tabPayment = document.getElementById('tabPayment');
     const tabChats = document.getElementById('tabChats');
@@ -295,11 +294,6 @@ function displayInvoiceDetails(invoice) {
 
 async function generateQRCode(invoice) {
     const canvas = document.getElementById('qrcode');
-    const img = document.getElementById('qrcodeImg');
-    
-    // Ensure correct visibility defaults (prefer canvas first)
-    if (img) img.classList.add('hidden');
-    if (canvas) canvas.classList.remove('hidden');
     
     // Ensure QRCode library is loaded
     await waitForQRCodeLib();
@@ -349,13 +343,15 @@ async function generateQRCode(invoice) {
         if (!canvas) throw new Error('QR canvas not found');
         await QR.toCanvas(canvas, qrText, {
             width: 200,
+            height: 200,
+            colorDark: '#333333',
+            colorLight: '#ffffff',
             margin: 2,
-            errorCorrectionLevel: 'M',
-            color: { dark: '#333333', light: '#ffffff' }
+            errorCorrectionLevel: 'M'
         });
-        return;
     } catch (error) {
-        console.error('QR code canvas render failed:', error);
+        console.error('QR code generation error:', error);
+        canvas.getContext('2d').fillText('QR Code Error', 10, 50);
     }
     
     // Fallback: data URL -> <img>
@@ -527,11 +523,9 @@ For questions, please contact support.
 
 function downloadQRCode() {
     const canvas = document.getElementById('qrcode');
-    const img = document.getElementById('qrcodeImg');
     const link = document.createElement('a');
     link.download = `qr_code_${currentInvoice.invoiceNumber}.png`;
-    const isImgVisible = img && !img.classList.contains('hidden') && img.src;
-    link.href = isImgVisible ? img.src : canvas.toDataURL();
+    link.href = canvas.toDataURL();
     link.click();
 }
 
@@ -545,21 +539,6 @@ function newPayment() {
     
     // Clear current invoice
     currentInvoice = null;
-    
-    // Clear QR code elements
-    try {
-        const canvas = document.getElementById('qrcode');
-        const img = document.getElementById('qrcodeImg');
-        if (img) {
-            img.src = '';
-            img.classList.add('hidden');
-        }
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width || 0, canvas.height || 0);
-            canvas.classList.remove('hidden');
-        }
-    } catch (_) {}
     
     // Focus on first input
     document.getElementById('customerName').focus();

@@ -8,7 +8,7 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: url('assets/psychedelic-fractal.jpg') center/cover no-repeat fixed, radial-gradient(circle at 20% 20%, rgba(26,12,43,0.85), rgba(10,0,22,0.9) 60%);
     min-height: 100vh;
-    color: #e7e2ff;
+    color: #333;
     line-height: 1.6;
     overflow-x: hidden;
 }
@@ -23,7 +23,7 @@ body {
 
 header {
     text-align: center;
-    color: #f7f5ff;
+    color: white;
     margin-bottom: 40px;
     padding: 20px 0;
 }
@@ -32,7 +32,7 @@ header h1 {
     font-size: 2.5rem;
     font-weight: 300;
     margin-bottom: 10px;
-    text-shadow: 0 0 12px rgba(170, 0, 255, 0.6), 0 0 24px rgba(0, 255, 204, 0.4);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 header p {
@@ -66,18 +66,17 @@ header p {
     color: #f5f0ff;
     box-shadow: 0 5px 15px rgba(161, 0, 255, 0.35);
 }
-
 .card {
-    background: rgba(15, 5, 30, 0.55);
-    border-radius: 16px;
+    background: white;
+    border-radius: 15px;
     padding: 40px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.06);
-    backdrop-filter: blur(14px) saturate(120%);
-    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
 }
 
 .card h2 {
-    color: #e7e2ff;
+    color: #333;
     margin-bottom: 30px;
     font-size: 1.8rem;
     font-weight: 400;
@@ -92,32 +91,31 @@ header p {
     display: block;
     margin-bottom: 8px;
     font-weight: 500;
-    color: #b7a8ff;
+    color: #555;
     font-size: 0.95rem;
 }
 
 .form-group input {
     width: 100%;
     padding: 15px;
-    border: 2px solid rgba(170, 0, 255, 0.35);
-    border-radius: 12px;
+    border: 2px solid #e1e5e9;
+    border-radius: 10px;
     font-size: 1rem;
     transition: all 0.3s ease;
-    background: rgba(255,255,255,0.06);
-    color: #f5f0ff;
+    background: #f8f9fa;
 }
 
 .form-group input:focus {
     outline: none;
-    border-color: #00ffcc;
-    background: rgba(0,0,0,0.2);
-    box-shadow: 0 0 0 4px rgba(0, 255, 204, 0.15), 0 0 18px rgba(170, 0, 255, 0.3);
+    border-color: #667eea;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .btn-primary, .btn-secondary {
     padding: 15px 30px;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
@@ -130,11 +128,10 @@ header p {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #a100ff 0%, #00ffcc 100%);
-    color: #0a0016;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
     width: 100%;
     margin-top: 10px;
-    box-shadow: 0 10px 24px rgba(0,255,204,0.25), 0 0 20px rgba(161,0,255,0.25);
 }
 
 .wallet-buttons {
@@ -165,25 +162,25 @@ header p {
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 16px 32px rgba(0,255,204,0.35), 0 0 28px rgba(161,0,255,0.35);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
 }
 
 .btn-secondary {
-    background: rgba(255,255,255,0.06);
-    color: #d4ccff;
-    border: 2px solid rgba(255,255,255,0.15);
+    background: #f8f9fa;
+    color: #555;
+    border: 2px solid #e1e5e9;
     margin-right: 15px;
 }
 
 .btn-secondary:hover {
-    background: rgba(255,255,255,0.12);
+    background: #e9ecef;
     transform: translateY(-1px);
 }
 
 .spinner {
     width: 20px;
     height: 20px;
-    border: 2px solid rgba(255,255,255,0.7);
+    border: 2px solid #ffffff;
     border-top: 2px solid transparent;
     border-radius: 50%;
     animation: spin 1s linear infinite;
@@ -204,11 +201,11 @@ header p {
 }
 
 .invoice-details {
-    background: rgba(255,255,255,0.06);
+    background: #f8f9fa;
     padding: 25px;
     border-radius: 10px;
     margin-bottom: 30px;
-    border-left: 4px solid #a100ff;
+    border-left: 4px solid #667eea;
 }
 
 .invoice-row {
@@ -223,16 +220,16 @@ header p {
     border-bottom: none;
     font-weight: 600;
     font-size: 1.1rem;
-    color: #00ffcc;
+    color: #667eea;
 }
 
 .invoice-label {
     font-weight: 500;
-    color: #b7a8ff;
+    color: #555;
 }
 
 .invoice-value {
-    color: #f0eaff;
+    color: #333;
 }
 
 .qr-section {
@@ -242,12 +239,12 @@ header p {
 
 .qr-section h3 {
     margin-bottom: 20px;
-    color: #b7a8ff;
+    color: #555;
 }
 
 #qrcode {
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 12px;
+    border: 1px solid #e1e5e9;
+    border-radius: 10px;
     padding: 20px;
     background: rgba(0,0,0,0.3);
     box-shadow: 0 5px 25px rgba(161,0,255,0.25);
@@ -392,7 +389,7 @@ header p {
 
 .qr-description {
     margin-top: 15px;
-    color: #cbbaff;
+    color: #777;
     font-style: italic;
 }
 
@@ -400,21 +397,21 @@ header p {
     text-align: center;
     margin-top: 30px;
     padding-top: 20px;
-    border-top: 1px solid rgba(255,255,255,0.15);
+    border-top: 1px solid #e1e5e9;
 }
 
 .demo-notice {
-    background: rgba(255, 193, 7, 0.08);
-    border: 1px solid rgba(255, 193, 7, 0.25);
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.3);
     border-radius: 10px;
     padding: 15px;
     margin-top: 30px;
     text-align: center;
-    color: #ffeebe;
+    color: #856404;
 }
 
 .demo-notice strong {
-    color: #ffeebe;
+    color: #856404;
 }
 
 /* Responsive Design */

@@ -18,12 +18,6 @@
         </header>
 
         <main>
-            <!-- Tabs Navigation -->
-            <div class="tabs" role="tablist">
-                <button id="tabPayment" class="tab-button active" data-tab="payment" role="tab" aria-selected="true">Payments</button>
-                <button id="tabChats" class="tab-button" data-tab="chats" role="tab" aria-selected="false">Chats</button>
-            </div>
-
             <!-- Payment Form -->
             <div class="payment-section" id="paymentSection">
                 <div class="card">
@@ -72,7 +66,6 @@
                     <div class="qr-section">
                         <h3>Invoice QR Code</h3>
                         <canvas id="qrcode"></canvas>
-                        <img id="qrcodeImg" class="hidden" alt="Invoice QR code">
                         <p class="qr-description">Scan to view invoice details</p>
                     </div>
                     <div class="action-buttons">
@@ -81,7 +74,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- Chats Section -->
             <div class="chat-section hidden" id="chatSection">
                 <div class="card">
@@ -107,7 +99,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- Demo Mode Notice -->
             <div class="demo-notice">
                 <p><strong>Demo Mode:</strong> This is a demonstration. No actual payments will be processed.</p>
