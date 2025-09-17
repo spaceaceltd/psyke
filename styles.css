@@ -279,6 +279,21 @@ header p {
 }
 .webrtc-mode .btn-secondary { flex: 1; }
 
+.webrtc-room {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+#webrtcRoom {
+    padding: 12px;
+    border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.06);
+    color: #f5f0ff;
+}
+
 .webrtc-header {
     display: flex;
     align-items: center;

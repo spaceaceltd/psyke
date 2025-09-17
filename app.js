@@ -42,11 +42,15 @@ function initializeApp() {
     const btnJoinCreateAnswer = document.getElementById('btnJoinCreateAnswer');
     const btnModeStart = document.getElementById('btnModeStart');
     const btnModeJoin = document.getElementById('btnModeJoin');
+    const btnWsConnect = document.getElementById('btnWsConnect');
+    const btnWsDisconnect = document.getElementById('btnWsDisconnect');
     if (btnHostCreateOffer) btnHostCreateOffer.addEventListener('click', webrtcHostCreateOffer);
     if (btnHostSetAnswer) btnHostSetAnswer.addEventListener('click', webrtcHostSetAnswer);
     if (btnJoinCreateAnswer) btnJoinCreateAnswer.addEventListener('click', webrtcJoinCreateAnswer);
     if (btnModeStart) btnModeStart.addEventListener('click', () => switchWebrtcMode('start'));
     if (btnModeJoin) btnModeJoin.addEventListener('click', () => switchWebrtcMode('join'));
+    if (btnWsConnect) btnWsConnect.addEventListener('click', connectSignaling);
+    if (btnWsDisconnect) btnWsDisconnect.addEventListener('click', disconnectSignaling);
 }
 
 // Removed fractal background animation functions
@@ -91,6 +95,8 @@ const chatMessages = [];
 let webrtcPeer = null;
 let webrtcChannel = null;
 let isWebrtcConnected = false;
+let ws = null;
+let wsRoom = '';
 
 function sendChatMessage() {
     const input = document.getElementById('chatInput');
@@ -514,6 +520,58 @@ function setWebrtcStatus(text) {
     if (el) el.textContent = text;
 }
 
+async function connectSignaling() {
+    if (ws && ws.readyState === WebSocket.OPEN) return;
+    const roomInput = document.getElementById('webrtcRoom');
+    wsRoom = (roomInput && roomInput.value.trim()) || 'default-room';
+    const wssBase = await fetchSignalingBase();
+    const url = `${wssBase.replace('http', 'ws')}/ws`;
+    try {
+        ws = new WebSocket(url);
+    } catch (e) {
+        alert('WebSocket not supported');
+        return;
+    }
+    ws.onopen = () => {
+        ws.send(JSON.stringify({ type: 'join', room: wsRoom }));
+        setWebrtcStatus('Signaling Connected');
+    };
+    ws.onclose = () => {
+        setWebrtcStatus('Disconnected');
+    };
+    ws.onmessage = async (e) => {
+        try {
+            const msg = JSON.parse(e.data);
+            if (msg.type === 'joined') {
+                // no-op
+            } else if (msg.type === 'offer') {
+                await handleRemoteOffer(msg);
+            } else if (msg.type === 'answer') {
+                await handleRemoteAnswer(msg);
+            } else if (msg.type === 'candidate') {
+                await handleRemoteCandidate(msg);
+            } else if (msg.type === 'peer-left') {
+                resetWebrtc();
+            }
+        } catch (_) {}
+    };
+}
+
+function disconnectSignaling() {
+    try { if (ws) ws.close(); } catch (_) {}
+    ws = null;
+}
+
+async function fetchSignalingBase() {
+    try {
+        const res = await fetch('signaling.json', { cache: 'no-store' });
+        const data = await res.json();
+        return (data.wssBase || '').replace('http://', 'ws://').replace('https://', 'wss://');
+    } catch (_) {
+        return 'ws://localhost:8765';
+    }
+}
+
 function switchWebrtcMode(mode) {
     const start = document.getElementById('webrtcStart');
     const join = document.getElementById('webrtcJoin');
@@ -533,6 +591,11 @@ function bindPeerEvents(peer) {
         setWebrtcStatus(state.charAt(0).toUpperCase() + state.slice(1));
         if (state === 'disconnected' || state === 'failed' || state === 'closed') {
             isWebrtcConnected = false;
+        }
+    };
+    peer.onicecandidate = (e) => {
+        if (e.candidate && ws && ws.readyState === WebSocket.OPEN && wsRoom) {
+            ws.send(JSON.stringify({ type: 'candidate', room: wsRoom, candidate: e.candidate }));
         }
     };
     peer.oniceconnectionstatechange = () => {
@@ -581,6 +644,11 @@ async function webrtcHostCreateOffer() {
 
     const offerOut = document.getElementById('offerOut');
     if (offerOut) offerOut.value = JSON.stringify(webrtcPeer.localDescription);
+
+    // Auto signaling: send offer via WS if connected
+    if (ws && ws.readyState === WebSocket.OPEN && wsRoom) {
+        ws.send(JSON.stringify({ type: 'offer', room: wsRoom, sdp: webrtcPeer.localDescription }));
+    }
 }
 
 async function webrtcHostSetAnswer() {
@@ -615,6 +683,10 @@ async function webrtcJoinCreateAnswer() {
 
     const answerOut = document.getElementById('answerOut');
     if (answerOut) answerOut.value = JSON.stringify(webrtcPeer.localDescription);
+
+    if (ws && ws.readyState === WebSocket.OPEN && wsRoom) {
+        ws.send(JSON.stringify({ type: 'answer', room: wsRoom, sdp: webrtcPeer.localDescription }));
+    }
 }
 
 function waitForIceGatheringComplete(pc) {
@@ -631,4 +703,39 @@ function waitForIceGatheringComplete(pc) {
             pc.addEventListener('icegatheringstatechange', check);
         }
     });
+}
+
+async function handleRemoteOffer(msg) {
+    resetWebrtc();
+    webrtcPeer = new RTCPeerConnection(getWebrtcConfig());
+    bindPeerEvents(webrtcPeer);
+    try {
+        await webrtcPeer.setRemoteDescription(msg.sdp);
+        const answer = await webrtcPeer.createAnswer();
+        await webrtcPeer.setLocalDescription(answer);
+        await waitForIceGatheringComplete(webrtcPeer);
+        if (ws && ws.readyState === WebSocket.OPEN && wsRoom) {
+            ws.send(JSON.stringify({ type: 'answer', room: wsRoom, sdp: webrtcPeer.localDescription }));
+        }
+    } catch (e) {
+        console.error('Failed handling remote offer', e);
+    }
+}
+
+async function handleRemoteAnswer(msg) {
+    if (!webrtcPeer) return;
+    try {
+        await webrtcPeer.setRemoteDescription(msg.sdp);
+    } catch (e) {
+        console.error('Failed applying remote answer', e);
+    }
+}
+
+async function handleRemoteCandidate(msg) {
+    if (!webrtcPeer) return;
+    try {
+        await webrtcPeer.addIceCandidate(msg.candidate);
+    } catch (e) {
+        console.error('Failed adding ICE candidate', e);
+    }
 }
