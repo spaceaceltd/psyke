@@ -398,15 +398,41 @@ async function generateQRCode(invoice) {
 }
 
 async function waitForQRCodeLib() {
-    if (window.QRCode) return;
+    if (window.QRCode || window.QRious) return;
     const start = Date.now();
-    while (!window.QRCode && Date.now() - start < 2000) {
+    while (!(window.QRCode || window.QRious) && Date.now() - start < 3000) {
         await new Promise(r => setTimeout(r, 50));
     }
 }
 
 function getQRCodeAPI() {
     if (window.QRCode) return window.QRCode;
+    if (window.QRious) {
+        // Adapter shim to provide toCanvas/toDataURL interface using QRious
+        return {
+            toCanvas: (canvas, text, opts = {}) => {
+                return new Promise((resolve) => {
+                    const qr = new window.QRious({
+                        element: canvas,
+                        value: text,
+                        size: opts.width || 200,
+                        level: (opts.errorCorrectionLevel || 'M')
+                    });
+                    resolve();
+                });
+            },
+            toDataURL: (text, opts = {}) => {
+                const temp = document.createElement('canvas');
+                const qr = new window.QRious({
+                    element: temp,
+                    value: text,
+                    size: opts.width || 200,
+                    level: (opts.errorCorrectionLevel || 'M')
+                });
+                return Promise.resolve(temp.toDataURL('image/png'));
+            }
+        };
+    }
     try {
         // Fallback if global variable exists without window property
         // eslint-disable-next-line no-undef
