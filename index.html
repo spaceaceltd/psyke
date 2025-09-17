@@ -9,7 +9,6 @@
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 </head>
 <body>
-    <canvas id="fractalBg" aria-hidden="true"></canvas>
     <div class="container">
         <header>
             <h1>Payment & Invoice System</h1>
@@ -17,12 +16,6 @@
         </header>
 
         <main>
-            <!-- Tabs Navigation -->
-            <div class="tabs" role="tablist">
-                <button id="tabPayment" class="tab-button active" data-tab="payment" role="tab" aria-selected="true">Payments</button>
-                <button id="tabChats" class="tab-button" data-tab="chats" role="tab" aria-selected="false">Chats</button>
-            </div>
-
             <!-- Payment Form -->
             <div class="payment-section" id="paymentSection">
                 <div class="card">
@@ -66,24 +59,11 @@
                     <div class="qr-section">
                         <h3>Invoice QR Code</h3>
                         <canvas id="qrcode"></canvas>
-                        <img id="qrcodeImg" class="hidden" alt="Invoice QR code">
                         <p class="qr-description">Scan to view invoice details</p>
                     </div>
                     <div class="action-buttons">
                         <button class="btn-secondary" onclick="downloadInvoice()">Download Invoice</button>
                         <button class="btn-primary" onclick="newPayment()">New Payment</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Chats Section -->
-            <div class="chat-section hidden" id="chatSection">
-                <div class="card">
-                    <h2>Chats</h2>
-                    <div class="chat-messages" id="chatMessages" aria-live="polite" aria-label="Chat messages"></div>
-                    <div class="chat-input-container">
-                        <input type="text" id="chatInput" placeholder="Type a message..." aria-label="Chat message">
-                        <button class="btn-primary" id="sendChatBtn">Send</button>
                     </div>
                 </div>
             </div>
