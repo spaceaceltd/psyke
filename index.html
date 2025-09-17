@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="styles.css">
     <script src="https://js.stripe.com/v3/"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -16,6 +18,10 @@
         </header>
 
         <main>
+            <div class="tabs" role="tablist">
+                <button id="tabPayment" class="tab-button active" data-tab="payment" role="tab" aria-selected="true">Payments</button>
+                <button id="tabChats" class="tab-button" data-tab="chats" role="tab" aria-selected="false">Chats</button>
+            </div>
             <!-- Payment Form -->
             <div class="payment-section" id="paymentSection">
                 <div class="card">
@@ -45,6 +51,11 @@
                             <span id="btnText">Process Payment</span>
                             <div id="spinner" class="spinner hidden"></div>
                         </button>
+                        <div class="wallet-buttons">
+                            <button type="button" class="wallet-btn wallet-gpay" id="btnGPay" aria-label="Pay with Google Pay">GPay</button>
+                            <button type="button" class="wallet-btn wallet-applepay" id="btnApplePay" aria-label="Pay with Apple Pay">Apple Pay</button>
+                            <button type="button" class="wallet-btn wallet-amazonpay" id="btnAmazonPay" aria-label="Pay with Amazon Pay">Amazon Pay</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -67,7 +78,31 @@
                     </div>
                 </div>
             </div>
-
+            <!-- Chats Section -->
+            <div class="chat-section hidden" id="chatSection">
+                <div class="card">
+                    <h2>Chats</h2>
+                    <div class="webrtc-section" id="webrtcSection">
+                        <div class="webrtc-header">
+                            <span class="webrtc-title">Two-Person Chat</span>
+                            <span class="webrtc-status" id="webrtcStatus">Disconnected</span>
+                        </div>
+                        <div class="webrtc-room">
+                            <input type="text" id="webrtcRoom" placeholder="Room code (e.g., team-123)" aria-label="Room code">
+                            <button class="btn-secondary" id="btnWsConnect">Connect</button>
+                            <button class="btn-secondary" id="btnWsDisconnect">Disconnect</button>
+                        </div>
+                        <div class="webrtc-actions">
+                            <button class="btn-secondary" id="btnStartChat">Start Chat</button>
+                        </div>
+                    </div>
+                    <div class="chat-messages" id="chatMessages" aria-live="polite" aria-label="Chat messages"></div>
+                    <div class="chat-input-container">
+                        <textarea id="chatInput" class="chat-textarea" rows="1" placeholder="Type a message (Enter to send, Shift+Enter for newline)" aria-label="Chat message"></textarea>
+                        <button class="btn-primary" id="sendChatBtn">Send</button>
+                    </div>
+                </div>
+            </div>
             <!-- Demo Mode Notice -->
             <div class="demo-notice">
                 <p><strong>Demo Mode:</strong> This is a demonstration. No actual payments will be processed.</p>

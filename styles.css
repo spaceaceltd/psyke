@@ -6,11 +6,14 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: url('assets/psychedelic-fractal.jpg') center/cover no-repeat fixed, radial-gradient(circle at 20% 20%, rgba(26,12,43,0.85), rgba(10,0,22,0.9) 60%);
     min-height: 100vh;
     color: #333;
     line-height: 1.6;
+    overflow-x: hidden;
 }
+
+/* Removed fractal canvas background in favor of static image */
 
 .container {
     max-width: 800px;
@@ -37,6 +40,37 @@ header p {
     opacity: 0.9;
 }
 
+.tabs {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 10px 0;
+    backdrop-filter: blur(8px) saturate(120%);
+}
+
+.tab-button {
+    padding: 10px 16px;
+    border: 2px solid #e1e5e9;
+    background: rgba(255,255,255,0.85);
+    color: #333;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+    background: #e9ecef;
+}
+
+.tab-button.active {
+    border-color: #a100ff;
+    color: #fff;
+    background: linear-gradient(135deg, #a100ff 0%, #00ffcc 100%);
+    box-shadow: 0 6px 16px rgba(161, 0, 255, 0.35);
+}
 .card {
     background: white;
     border-radius: 15px;
@@ -70,17 +104,32 @@ header p {
     width: 100%;
     padding: 15px;
     border: 2px solid #e1e5e9;
-    border-radius: 10px;
+    border-radius: 12px;
     font-size: 1rem;
-    transition: all 0.3s ease;
-    background: #f8f9fa;
+    transition: all 0.2s ease;
+    background: #ffffff;
+    color: #333;
+}
+
+.form-group input:hover {
+    border-color: #d6dce2;
 }
 
 .form-group input:focus {
     outline: none;
     border-color: #667eea;
-    background: white;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+.form-group input::placeholder {
+    color: #9aa3ad;
+}
+
+.form-group input:disabled {
+    background: #f3f4f6;
+    color: #9aa3ad;
+    cursor: not-allowed;
 }
 
 .btn-primary, .btn-secondary {
@@ -103,6 +152,32 @@ header p {
     color: white;
     width: 100%;
     margin-top: 10px;
+}
+
+.wallet-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.wallet-btn {
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 2px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.06);
+    color: #f5f0ff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.wallet-btn:hover { transform: translateY(-1px); }
+.wallet-gpay { background: linear-gradient(135deg, #1a73e8 0%, #34a853 100%); color: #fff; }
+.wallet-applepay { background: #000; color: #fff; }
+.wallet-amazonpay { background: #232f3e; color: #ff9900; }
+
+@media (max-width: 480px) {
+    .wallet-buttons { grid-template-columns: 1fr; }
 }
 
 .btn-primary:hover {
@@ -191,8 +266,160 @@ header p {
     border: 1px solid #e1e5e9;
     border-radius: 10px;
     padding: 20px;
-    background: white;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    background: rgba(0,0,0,0.3);
+    box-shadow: 0 5px 25px rgba(161,0,255,0.25);
+}
+
+#qrcodeImg {
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    padding: 20px;
+    background: rgba(0,0,0,0.3);
+    box-shadow: 0 5px 25px rgba(161,0,255,0.25);
+    max-width: 200px;
+}
+
+.chat-section {
+    margin-top: 30px;
+}
+
+.webrtc-section {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px dashed rgba(255,255,255,0.2);
+}
+
+.webrtc-mode {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.webrtc-mode .btn-secondary { flex: 1; }
+
+.webrtc-room {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+#webrtcRoom {
+    padding: 12px 14px;
+    border: 2px solid #e1e5e9;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #333;
+}
+
+#webrtcRoom:hover { border-color: #d6dce2; }
+#webrtcRoom:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+#webrtcRoom::placeholder { color: #9aa3ad; }
+
+.webrtc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.webrtc-title {
+    color: #d4ccff;
+}
+
+.webrtc-status {
+    font-size: 0.9rem;
+    color: #ff9cf2;
+}
+
+.webrtc-grid {
+    display: none;
+}
+
+.webrtc-block h3 {
+    margin-bottom: 8px;
+    color: #cbbaff;
+}
+
+.webrtc-sdp {
+    width: 100%;
+    min-height: 100px;
+    border: 2px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.06);
+    color: #f5f0ff;
+    padding: 10px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    margin: 8px 0 12px;
+}
+
+.btn-secondary.small {
+    padding: 10px 14px;
+}
+
+.webrtc-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+    .webrtc-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.chat-messages {
+    height: 300px;
+    overflow-y: auto;
+    border: 2px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    padding: 15px;
+    background: rgba(255,255,255,0.06);
+    margin-bottom: 15px;
+}
+
+.chat-message {
+    margin-bottom: 10px;
+}
+
+.chat-message .author {
+    font-weight: 600;
+    color: #00ffcc;
+    margin-right: 6px;
+}
+
+.chat-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.chat-textarea {
+    flex: 1;
+    padding: 12px 14px;
+    border: 2px solid #e1e5e9;
+    border-radius: 12px;
+    font-size: 1rem;
+    background: #ffffff;
+    color: #333;
+    max-height: 180px;
+    resize: none;
+    line-height: 1.35;
+}
+.chat-textarea:hover { border-color: #d6dce2; }
+.chat-textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+.chat-textarea::placeholder { color: #9aa3ad; }
+
+#sendChatBtn {
+    position: static;
 }
 
 .qr-description {
@@ -245,6 +472,18 @@ header p {
         margin-bottom: 15px;
         width: 100%;
     }
+
+    .tabs .tab-button {
+        flex: 1 1 45%;
+    }
+
+    .webrtc-sdp {
+        min-height: 80px;
+    }
+
+    .chat-textarea {
+        max-height: 160px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -262,5 +501,13 @@ header p {
     
     .btn-primary, .btn-secondary {
         padding: 12px 20px;
+    }
+
+    .tabs .tab-button {
+        flex: 1 1 100%;
+    }
+
+    .chat-textarea {
+        max-height: 140px;
     }
 }
