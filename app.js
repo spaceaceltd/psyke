@@ -392,25 +392,63 @@ function downloadInvoice() {
         alert('No invoice to download');
         return;
     }
-    
-    // Create a temporary link to download invoice as text
-    const invoiceText = generateInvoiceText(currentInvoice);
-    const blob = new Blob([invoiceText], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
-    a.style.display = 'none';
-    a.href = url;
-    a.download = `invoice_${currentInvoice.invoiceNumber}.txt`;
-    
-    document.body.appendChild(a);
-    a.click();
-    
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
-    
-    // Also download QR code
-    downloadQRCode();
+
+    // Generate a PDF that includes invoice details and the QR code
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+
+        const margin = 40;
+        let y = margin;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(20);
+        doc.text('INVOICE', margin, y);
+        y += 30;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(12);
+        const lines = generateInvoiceText(currentInvoice).split('\n');
+        lines.forEach(line => {
+            if (line.trim() === 'INVOICE' || line.trim().startsWith('====')) return;
+            doc.text(line, margin, y);
+            y += 16;
+        });
+
+        // Add QR image on the right
+        const canvas = document.getElementById('qrcode');
+        const img = document.getElementById('qrcodeImg');
+        let dataUrl = '';
+        try {
+            if (img && !img.classList.contains('hidden') && img.src) {
+                dataUrl = img.src;
+            } else if (canvas && !canvas.classList.contains('hidden')) {
+                dataUrl = canvas.toDataURL('image/png');
+            }
+        } catch (_) {}
+
+        if (dataUrl) {
+            const qrSize = 180; // pixels -> points roughly 1:1 at 72dpi
+            const pageWidth = doc.internal.pageSize.getWidth();
+            doc.addImage(dataUrl, 'PNG', pageWidth - qrSize - margin, margin, qrSize, qrSize);
+        }
+
+        doc.save(`invoice_${currentInvoice.invoiceNumber}.pdf`);
+    } catch (e) {
+        console.error('PDF generation failed, falling back to text + PNG:', e);
+        // Fallback: original behavior
+        const invoiceText = generateInvoiceText(currentInvoice);
+        const blob = new Blob([invoiceText], { type: 'text/plain' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `invoice_${currentInvoice.invoiceNumber}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        downloadQRCode();
+    }
 }
 
 function generateInvoiceText(invoice) {
