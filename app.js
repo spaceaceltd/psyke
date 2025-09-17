@@ -309,6 +309,9 @@ async function generateQRCode(invoice) {
     if (img) img.classList.add('hidden');
     if (canvas) canvas.classList.remove('hidden');
     
+    // Ensure QRCode library is loaded
+    await waitForQRCodeLib();
+
     // Create QR code data
     const qrData = {
         type: 'invoice',
@@ -326,12 +329,15 @@ async function generateQRCode(invoice) {
     // Clear previous canvas content
     try {
         const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width || 0, canvas.height || 0);
+        // Ensure canvas has sensible size before drawing
+        canvas.width = 220;
+        canvas.height = 220;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
     } catch (_) {}
     
     // Preferred: render to canvas
     try {
-        await QRCode.toCanvas(canvas, qrText, {
+        await window.QRCode.toCanvas(canvas, qrText, {
             width: 200,
             margin: 2,
             errorCorrectionLevel: 'M',
@@ -344,7 +350,7 @@ async function generateQRCode(invoice) {
     
     // Fallback: data URL -> <img>
     try {
-        const dataUrl = await QRCode.toDataURL(qrText, {
+        const dataUrl = await window.QRCode.toDataURL(qrText, {
             width: 200,
             margin: 2,
             errorCorrectionLevel: 'M',
@@ -363,12 +369,22 @@ async function generateQRCode(invoice) {
     // Last resort: show error text
     try {
         const ctx = canvas.getContext('2d');
+        canvas.width = 220;
+        canvas.height = 220;
         ctx.font = '16px sans-serif';
         ctx.fillStyle = '#333333';
-        ctx.fillText('QR Code Error', 10, 50);
+        ctx.fillText('QR Code Error', 10, 110);
         if (img) img.classList.add('hidden');
         if (canvas) canvas.classList.remove('hidden');
     } catch (_) {}
+}
+
+async function waitForQRCodeLib() {
+    if (window.QRCode) return;
+    const start = Date.now();
+    while (!window.QRCode && Date.now() - start < 2000) {
+        await new Promise(r => setTimeout(r, 50));
+    }
 }
 
 function downloadInvoice() {
