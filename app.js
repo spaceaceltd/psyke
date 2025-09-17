@@ -92,6 +92,7 @@ let ws = null;
 let wsRoom = '';
 let wsPeers = 0;
 let lastLocalOffer = null; // cache host offer if peer not yet present
+let wsShouldReconnect = false;
 
 function sendChatMessage() {
     const input = document.getElementById('chatInput');
@@ -101,6 +102,15 @@ function sendChatMessage() {
     // Send over WebRTC if available
     if (webrtcChannel && webrtcChannel.readyState === 'open') {
         webrtcChannel.send(JSON.stringify({ type: 'chat', text }));
+        chatMessages.push({ author: 'Me', text, timestamp: Date.now() });
+        renderChatMessages();
+        input.value = '';
+        return;
+    }
+
+    // Fallback: send via signaling server if connected
+    if (ws && ws.readyState === WebSocket.OPEN && wsRoom) {
+        try { ws.send(JSON.stringify({ type: 'chat', room: wsRoom, text })); } catch (_) {}
         chatMessages.push({ author: 'Me', text, timestamp: Date.now() });
         renderChatMessages();
         input.value = '';
@@ -614,6 +624,7 @@ async function connectSignaling() {
     try {
         if (ws) { try { ws.close(); } catch (_) {} }
         ws = new WebSocket(url);
+        wsShouldReconnect = true;
     } catch (e) {
         console.error('WebSocket init failed', e);
         alert('WebSocket not supported or blocked');
@@ -630,6 +641,11 @@ async function connectSignaling() {
     ws.onclose = () => {
         setWebrtcStatus('Disconnected');
         wsPeers = 0;
+        if (wsShouldReconnect) {
+            setTimeout(() => {
+                connectSignaling();
+            }, 2000);
+        }
     };
     ws.onmessage = async (e) => {
         try {
@@ -658,6 +674,9 @@ async function connectSignaling() {
             } else if (msg.type === 'error') {
                 console.error('Signaling error:', msg.message);
                 setWebrtcStatus(`Error: ${msg.message}`);
+            } else if (msg.type === 'chat' && typeof msg.text === 'string') {
+                chatMessages.push({ author: 'Peer', text: msg.text, timestamp: Date.now() });
+                renderChatMessages();
             }
         } catch (_) {}
     };
@@ -666,6 +685,7 @@ async function connectSignaling() {
 function disconnectSignaling() {
     try { if (ws) ws.close(); } catch (_) {}
     ws = null;
+    wsShouldReconnect = false;
 }
 
 async function fetchSignalingBase() {
