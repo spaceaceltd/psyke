@@ -137,6 +137,32 @@ header p {
     box-shadow: 0 10px 24px rgba(0,255,204,0.25), 0 0 20px rgba(161,0,255,0.25);
 }
 
+.wallet-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.wallet-btn {
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 2px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.06);
+    color: #f5f0ff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.wallet-btn:hover { transform: translateY(-1px); }
+.wallet-gpay { background: linear-gradient(135deg, #1a73e8 0%, #34a853 100%); color: #fff; }
+.wallet-applepay { background: #000; color: #fff; }
+.wallet-amazonpay { background: #232f3e; color: #ff9900; }
+
+@media (max-width: 480px) {
+    .wallet-buttons { grid-template-columns: 1fr; }
+}
+
 .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 16px 32px rgba(0,255,204,0.35), 0 0 28px rgba(161,0,255,0.35);

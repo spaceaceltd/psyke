@@ -76,6 +76,14 @@ function switchTab(tab) {
         invoiceSection.classList.add('hidden');
         chatSection.classList.remove('hidden');
     }
+
+    // Wallet buttons
+    const btnGPay = document.getElementById('btnGPay');
+    const btnApplePay = document.getElementById('btnApplePay');
+    const btnAmazonPay = document.getElementById('btnAmazonPay');
+    if (btnGPay) btnGPay.addEventListener('click', () => handleWalletPay('Google Pay'));
+    if (btnApplePay) btnApplePay.addEventListener('click', () => handleWalletPay('Apple Pay'));
+    if (btnAmazonPay) btnAmazonPay.addEventListener('click', () => handleWalletPay('Amazon Pay'));
 }
 
 // In-memory chat state (non-storage)
@@ -176,6 +184,39 @@ async function handlePaymentSubmit(event) {
     }
 }
 
+async function handleWalletPay(method) {
+    const form = document.getElementById('paymentForm');
+    const formData = new FormData(form);
+    const paymentData = {
+        customerName: formData.get('customerName') || 'Guest',
+        amount: parseFloat(formData.get('amount') || '0'),
+        description: formData.get('description') || `${method} Payment`,
+        email: formData.get('email') || 'guest@example.com',
+        timestamp: new Date().toISOString(),
+        invoiceNumber: generateInvoiceNumber(),
+        paymentMethod: method
+    };
+
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const spinner = document.getElementById('spinner');
+    submitBtn.disabled = true;
+    btnText.textContent = `Processing ${method}...`;
+    spinner.classList.remove('hidden');
+
+    try {
+        await simulatePaymentProcessing(paymentData);
+        await generateInvoice(paymentData);
+    } catch (e) {
+        console.error('Wallet payment error:', e);
+        alert(`${method} failed. Please try again.`);
+    } finally {
+        submitBtn.disabled = false;
+        btnText.textContent = 'Process Payment';
+        spinner.classList.add('hidden');
+    }
+}
+
 function generateInvoiceNumber() {
     const timestamp = Date.now();
     const random = Math.floor(Math.random() * 1000);
@@ -196,7 +237,7 @@ async function generateInvoice(paymentData) {
     currentInvoice = {
         ...paymentData,
         status: 'Paid',
-        paymentMethod: 'Demo Payment',
+        paymentMethod: paymentData.paymentMethod || 'Demo Payment',
         transactionId: `txn_${Date.now()}`
     };
     
