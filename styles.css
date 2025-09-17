@@ -104,17 +104,32 @@ header p {
     width: 100%;
     padding: 15px;
     border: 2px solid #e1e5e9;
-    border-radius: 10px;
+    border-radius: 12px;
     font-size: 1rem;
-    transition: all 0.3s ease;
-    background: #f8f9fa;
+    transition: all 0.2s ease;
+    background: #ffffff;
+    color: #333;
+}
+
+.form-group input:hover {
+    border-color: #d6dce2;
 }
 
 .form-group input:focus {
     outline: none;
     border-color: #667eea;
-    background: white;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+.form-group input::placeholder {
+    color: #9aa3ad;
+}
+
+.form-group input:disabled {
+    background: #f3f4f6;
+    color: #9aa3ad;
+    cursor: not-allowed;
 }
 
 .btn-primary, .btn-secondary {
@@ -289,12 +304,20 @@ header p {
 }
 
 #webrtcRoom {
-    padding: 12px;
-    border: 2px solid rgba(255,255,255,0.15);
+    padding: 12px 14px;
+    border: 2px solid #e1e5e9;
     border-radius: 12px;
-    background: rgba(255,255,255,0.06);
-    color: #f5f0ff;
+    background: #ffffff;
+    color: #333;
 }
+
+#webrtcRoom:hover { border-color: #d6dce2; }
+#webrtcRoom:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+#webrtcRoom::placeholder { color: #9aa3ad; }
 
 .webrtc-header {
     display: flex;
@@ -378,15 +401,22 @@ header p {
 .chat-textarea {
     flex: 1;
     padding: 12px 14px;
-    border: 2px solid rgba(255,255,255,0.15);
+    border: 2px solid #e1e5e9;
     border-radius: 12px;
     font-size: 1rem;
-    background: rgba(255,255,255,0.06);
-    color: #f5f0ff;
+    background: #ffffff;
+    color: #333;
     max-height: 180px;
     resize: none;
     line-height: 1.35;
 }
+.chat-textarea:hover { border-color: #d6dce2; }
+.chat-textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+.chat-textarea::placeholder { color: #9aa3ad; }
 
 #sendChatBtn {
     position: static;
