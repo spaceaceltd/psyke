@@ -96,20 +96,8 @@
                             <button class="btn-secondary" id="btnWsConnect">Connect</button>
                             <button class="btn-secondary" id="btnWsDisconnect">Disconnect</button>
                         </div>
-                        <div class="webrtc-mode">
-                            <button class="btn-secondary" id="btnModeStart">Start</button>
-                            <button class="btn-secondary" id="btnModeJoin">Join</button>
-                        </div>
-                        <div class="webrtc-simple" id="webrtcStart">
-                            <button class="btn-secondary" id="btnHostCreateOffer">Create Offer</button>
-                            <textarea id="offerOut" class="webrtc-sdp" readonly placeholder="Offer will appear here. Copy it to your peer."></textarea>
-                            <textarea id="answerIn" class="webrtc-sdp" placeholder="Paste peer's Answer JSON here"></textarea>
-                            <button class="btn-secondary small" id="btnHostSetAnswer">Apply Answer</button>
-                        </div>
-                        <div class="webrtc-simple hidden" id="webrtcJoin">
-                            <textarea id="offerIn" class="webrtc-sdp" placeholder="Paste host's Offer JSON here"></textarea>
-                            <button class="btn-secondary" id="btnJoinCreateAnswer">Create Answer</button>
-                            <textarea id="answerOut" class="webrtc-sdp" readonly placeholder="Answer will appear here. Send it back to host."></textarea>
+                        <div class="webrtc-actions">
+                            <button class="btn-secondary" id="btnStartChat">Start Chat</button>
                         </div>
                     </div>
                     <div class="chat-messages" id="chatMessages" aria-live="polite" aria-label="Chat messages"></div>

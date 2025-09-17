@@ -335,6 +335,12 @@ header p {
     padding: 10px 14px;
 }
 
+.webrtc-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
 @media (max-width: 768px) {
     .webrtc-grid {
         grid-template-columns: 1fr;

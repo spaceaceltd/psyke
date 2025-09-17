@@ -37,22 +37,12 @@ function initializeApp() {
     }
 
     // WebRTC UI events
-    const btnHostCreateOffer = document.getElementById('btnHostCreateOffer');
-    const btnHostSetAnswer = document.getElementById('btnHostSetAnswer');
-    const btnJoinCreateAnswer = document.getElementById('btnJoinCreateAnswer');
-    const btnModeStart = document.getElementById('btnModeStart');
-    const btnModeJoin = document.getElementById('btnModeJoin');
+    const btnStartChat = document.getElementById('btnStartChat');
     const btnWsConnect = document.getElementById('btnWsConnect');
     const btnWsDisconnect = document.getElementById('btnWsDisconnect');
-    const btnClearOffer = document.getElementById('btnClearOffer');
-    if (btnHostCreateOffer) btnHostCreateOffer.addEventListener('click', webrtcHostCreateOffer);
-    if (btnHostSetAnswer) btnHostSetAnswer.addEventListener('click', webrtcHostSetAnswer);
-    if (btnJoinCreateAnswer) btnJoinCreateAnswer.addEventListener('click', webrtcJoinCreateAnswer);
-    if (btnModeStart) btnModeStart.addEventListener('click', () => switchWebrtcMode('start'));
-    if (btnModeJoin) btnModeJoin.addEventListener('click', () => switchWebrtcMode('join'));
+    if (btnStartChat) btnStartChat.addEventListener('click', webrtcHostCreateOffer);
     if (btnWsConnect) btnWsConnect.addEventListener('click', connectSignaling);
     if (btnWsDisconnect) btnWsDisconnect.addEventListener('click', disconnectSignaling);
-    if (btnClearOffer) btnClearOffer.addEventListener('click', webrtcHostCreateOffer);
 }
 
 // Removed fractal background animation functions
