@@ -41,18 +41,22 @@ header p {
 }
 
 .tabs {
+    position: sticky;
+    top: 0;
+    z-index: 10;
     display: flex;
     gap: 10px;
     margin-bottom: 20px;
-    flex-wrap: wrap;
+    padding: 10px 0;
+    backdrop-filter: blur(8px) saturate(120%);
 }
 
 .tab-button {
     padding: 10px 16px;
     border: 2px solid #e1e5e9;
-    background: #f8f9fa;
-    color: #555;
-    border-radius: 8px;
+    background: rgba(255,255,255,0.85);
+    color: #333;
+    border-radius: 999px;
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -63,8 +67,9 @@ header p {
 
 .tab-button.active {
     border-color: #a100ff;
-    color: #f5f0ff;
-    box-shadow: 0 5px 15px rgba(161, 0, 255, 0.35);
+    color: #fff;
+    background: linear-gradient(135deg, #a100ff 0%, #00ffcc 100%);
+    box-shadow: 0 6px 16px rgba(161, 0, 255, 0.35);
 }
 .card {
     background: white;

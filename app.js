@@ -19,6 +19,8 @@ function initializeApp() {
     if (tabPayment && tabChats) {
         tabPayment.addEventListener('click', () => switchTab('payment'));
         tabChats.addEventListener('click', () => switchTab('chats'));
+        // Ensure initial state
+        switchTab('payment');
     }
 
     // Chat events
