@@ -44,6 +44,7 @@ header p {
     display: flex;
     gap: 10px;
     margin-bottom: 20px;
+    flex-wrap: wrap;
 }
 
 .tab-button {
@@ -250,6 +251,7 @@ header p {
     gap: 10px;
     margin-bottom: 10px;
 }
+.webrtc-mode .btn-secondary { flex: 1; }
 
 .webrtc-header {
     display: flex;
@@ -321,11 +323,13 @@ header p {
 .chat-input-container {
     display: flex;
     gap: 10px;
+    position: relative;
 }
 
 .chat-textarea {
     flex: 1;
     padding: 12px 14px;
+    padding-right: 88px; /* space for send button overlay */
     border: 2px solid rgba(255,255,255,0.15);
     border-radius: 12px;
     font-size: 1rem;
@@ -334,6 +338,16 @@ header p {
     max-height: 180px;
     resize: none;
     line-height: 1.35;
+}
+
+#sendChatBtn {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    min-width: 0;
+    padding: 10px 16px;
+    height: 40px;
+    line-height: 20px;
 }
 
 .qr-description {
@@ -386,6 +400,19 @@ header p {
         margin-bottom: 15px;
         width: 100%;
     }
+
+    .tabs .tab-button {
+        flex: 1 1 45%;
+    }
+
+    .webrtc-sdp {
+        min-height: 80px;
+    }
+
+    .chat-textarea {
+        padding-right: 84px;
+        max-height: 160px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -403,5 +430,21 @@ header p {
     
     .btn-primary, .btn-secondary {
         padding: 12px 20px;
+    }
+
+    .tabs .tab-button {
+        flex: 1 1 100%;
+    }
+
+    #sendChatBtn {
+        right: 6px;
+        bottom: 6px;
+        height: 36px;
+        padding: 8px 14px;
+    }
+
+    .chat-textarea {
+        padding-right: 78px;
+        max-height: 140px;
     }
 }
