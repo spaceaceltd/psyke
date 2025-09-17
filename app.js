@@ -631,20 +631,28 @@ function setWebrtcStatus(text) {
 }
 
 async function connectSignaling() {
-    if (ws && ws.readyState === WebSocket.OPEN) return;
+    if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
     const roomInput = document.getElementById('webrtcRoom');
     wsRoom = (roomInput && roomInput.value.trim()) || 'default-room';
+    setWebrtcStatus('Connecting...');
     const wssBase = await fetchSignalingBase();
-    const url = `${wssBase.replace('http', 'ws')}/ws`;
+    const base = (wssBase || '').replace(/\/$/, '');
+    const url = `${base}/ws`;
     try {
+        if (ws) { try { ws.close(); } catch (_) {} }
         ws = new WebSocket(url);
     } catch (e) {
-        alert('WebSocket not supported');
+        console.error('WebSocket init failed', e);
+        alert('WebSocket not supported or blocked');
         return;
     }
     ws.onopen = () => {
         ws.send(JSON.stringify({ type: 'join', room: wsRoom }));
         setWebrtcStatus('Signaling Connected');
+    };
+    ws.onerror = (ev) => {
+        console.error('WebSocket error', ev);
+        setWebrtcStatus('Connection Error');
     };
     ws.onclose = () => {
         setWebrtcStatus('Disconnected');
@@ -676,7 +684,11 @@ async function fetchSignalingBase() {
     try {
         const res = await fetch('signaling.json', { cache: 'no-store' });
         const data = await res.json();
-        return (data.wssBase || '').replace('http://', 'ws://').replace('https://', 'wss://');
+        let url = (data.wssBase || '').trim();
+        if (!url) return '';
+        if (url.startsWith('http://')) url = url.replace('http://', 'ws://');
+        if (url.startsWith('https://')) url = url.replace('https://', 'wss://');
+        return url;
     } catch (_) {
         return 'ws://localhost:8765';
     }
