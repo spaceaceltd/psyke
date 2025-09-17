@@ -99,6 +99,8 @@ let webrtcChannel = null;
 let isWebrtcConnected = false;
 let ws = null;
 let wsRoom = '';
+let wsPeers = 0;
+let lastLocalOffer = null; // cache host offer if peer not yet present
 
 function sendChatMessage() {
     const input = document.getElementById('chatInput');
@@ -656,12 +658,22 @@ async function connectSignaling() {
     };
     ws.onclose = () => {
         setWebrtcStatus('Disconnected');
+        wsPeers = 0;
     };
     ws.onmessage = async (e) => {
         try {
             const msg = JSON.parse(e.data);
             if (msg.type === 'joined') {
-                // no-op
+                wsPeers = Number(msg.peers || 1);
+                if (wsPeers >= 2) {
+                    setWebrtcStatus(`Room ${wsRoom}: Ready (2/2)`);
+                    // If we already created an offer before peer arrived, send it now
+                    if (lastLocalOffer && ws && ws.readyState === WebSocket.OPEN) {
+                        ws.send(JSON.stringify({ type: 'offer', room: wsRoom, sdp: lastLocalOffer }));
+                    }
+                } else {
+                    setWebrtcStatus(`Room ${wsRoom}: Waiting for peer (1/2)`);
+                }
             } else if (msg.type === 'offer') {
                 await handleRemoteOffer(msg);
             } else if (msg.type === 'answer') {
@@ -670,6 +682,11 @@ async function connectSignaling() {
                 await handleRemoteCandidate(msg);
             } else if (msg.type === 'peer-left') {
                 resetWebrtc();
+                wsPeers = Math.max(0, wsPeers - 1);
+                setWebrtcStatus(`Room ${wsRoom}: Waiting for peer (1/2)`);
+            } else if (msg.type === 'error') {
+                console.error('Signaling error:', msg.message);
+                setWebrtcStatus(`Error: ${msg.message}`);
             }
         } catch (_) {}
     };
@@ -767,9 +784,10 @@ async function webrtcHostCreateOffer() {
     const offerOut = document.getElementById('offerOut');
     if (offerOut) offerOut.value = JSON.stringify(webrtcPeer.localDescription);
 
-    // Auto signaling: send offer via WS if connected
-    if (ws && ws.readyState === WebSocket.OPEN && wsRoom) {
-        ws.send(JSON.stringify({ type: 'offer', room: wsRoom, sdp: webrtcPeer.localDescription }));
+    // Cache offer and send if a peer is present
+    lastLocalOffer = webrtcPeer.localDescription;
+    if (ws && ws.readyState === WebSocket.OPEN && wsRoom && wsPeers >= 2) {
+        ws.send(JSON.stringify({ type: 'offer', room: wsRoom, sdp: lastLocalOffer }));
     }
 }
 
