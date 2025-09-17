@@ -322,14 +322,13 @@ header p {
 
 .chat-input-container {
     display: flex;
+    flex-direction: column;
     gap: 10px;
-    position: relative;
 }
 
 .chat-textarea {
     flex: 1;
     padding: 12px 14px;
-    padding-right: 88px; /* space for send button overlay */
     border: 2px solid rgba(255,255,255,0.15);
     border-radius: 12px;
     font-size: 1rem;
@@ -341,13 +340,7 @@ header p {
 }
 
 #sendChatBtn {
-    position: absolute;
-    right: 8px;
-    bottom: 8px;
-    min-width: 0;
-    padding: 10px 16px;
-    height: 40px;
-    line-height: 20px;
+    position: static;
 }
 
 .qr-description {
@@ -410,7 +403,6 @@ header p {
     }
 
     .chat-textarea {
-        padding-right: 84px;
         max-height: 160px;
     }
 }
@@ -436,15 +428,7 @@ header p {
         flex: 1 1 100%;
     }
 
-    #sendChatBtn {
-        right: 6px;
-        bottom: 6px;
-        height: 36px;
-        padding: 8px 14px;
-    }
-
     .chat-textarea {
-        padding-right: 78px;
         max-height: 140px;
     }
 }
