@@ -48,8 +48,8 @@ async def handler(websocket: WebSocketServerProtocol, path: str):
                 continue
 
             mtype = data.get("type")
-            # Relay signaling messages to the other peer in the room
-            if mtype in ("offer", "answer", "candidate"):
+            # Relay signaling and chat messages to the other peer in the room
+            if mtype in ("offer", "answer", "candidate", "chat"):
                 await relay_to_other(room_code, websocket, data)
             elif mtype == "leave":
                 break
