@@ -44,6 +44,7 @@ function initializeApp() {
     const btnModeJoin = document.getElementById('btnModeJoin');
     const btnWsConnect = document.getElementById('btnWsConnect');
     const btnWsDisconnect = document.getElementById('btnWsDisconnect');
+    const btnClearOffer = document.getElementById('btnClearOffer');
     if (btnHostCreateOffer) btnHostCreateOffer.addEventListener('click', webrtcHostCreateOffer);
     if (btnHostSetAnswer) btnHostSetAnswer.addEventListener('click', webrtcHostSetAnswer);
     if (btnJoinCreateAnswer) btnJoinCreateAnswer.addEventListener('click', webrtcJoinCreateAnswer);
@@ -51,6 +52,7 @@ function initializeApp() {
     if (btnModeJoin) btnModeJoin.addEventListener('click', () => switchWebrtcMode('join'));
     if (btnWsConnect) btnWsConnect.addEventListener('click', connectSignaling);
     if (btnWsDisconnect) btnWsDisconnect.addEventListener('click', disconnectSignaling);
+    if (btnClearOffer) btnClearOffer.addEventListener('click', webrtcHostCreateOffer);
 }
 
 // Removed fractal background animation functions
