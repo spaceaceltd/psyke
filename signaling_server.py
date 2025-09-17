@@ -38,6 +38,8 @@ async def handler(websocket: WebSocketServerProtocol, path: str):
         logging.info(f"Peer joined room {room_code}. Peers now: {len(peers)}")
         # Notify current room state
         await websocket.send(json.dumps({"type": "joined", "room": room_code, "peers": len(peers)}))
+        # Broadcast peers count to all in room
+        await broadcast_peers(room_code)
 
         async for text in websocket:
             try:
@@ -70,6 +72,10 @@ async def handler(websocket: WebSocketServerProtocol, path: str):
                     await relay_to_other(room_code, websocket, {"type": "peer-left"})
                 except Exception:
                     pass
+                try:
+                    await broadcast_peers(room_code)
+                except Exception:
+                    pass
                 if not peers:
                     ROOM_TO_PEERS.pop(room_code, None)
 
@@ -83,6 +89,19 @@ async def relay_to_other(room: str, sender: WebSocketServerProtocol, message: di
             await peer.send(json.dumps(message))
         except Exception:
             # drop broken connection
+            try:
+                peers.remove(peer)
+            except Exception:
+                pass
+
+
+async def broadcast_peers(room: str):
+    peers = ROOM_TO_PEERS.get(room, set())
+    payload = json.dumps({"type": "peers", "count": len(peers)})
+    for peer in list(peers):
+        try:
+            await peer.send(payload)
+        except Exception:
             try:
                 peers.remove(peer)
             except Exception:
